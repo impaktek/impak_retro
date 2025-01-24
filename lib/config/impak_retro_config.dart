@@ -196,7 +196,7 @@ class _ImpakRetroConfig {
   /// [formData] contains the data to be uploaded.
   /// Other parameters are similar to those in `_setStreamType`.
   /// Returns the response data from the server.
-  Future<dynamic> formDataCall<T>({
+  Future<Response<dynamic>> formDataCall<T>({
     required String baseUrl,
     required String path,
     required RequestMethod method,
