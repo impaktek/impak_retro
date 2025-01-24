@@ -1,4 +1,3 @@
-
 import 'package:example/src/constants/local_constants.dart';
 import 'package:example/src/domain/sample_api_response_model.dart';
 import 'package:flutter/material.dart';
