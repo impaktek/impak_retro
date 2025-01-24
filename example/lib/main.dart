@@ -1,6 +1,7 @@
 import 'package:example/src/constants/local_constants.dart';
 import 'package:example/src/domain/sample_api_response_model.dart';
 import 'package:flutter/material.dart';
+import 'package:impak_retro/config/impak_retro_form_data.dart';
 import 'package:impak_retro/impak.dart';
 
 void main() {
@@ -58,33 +59,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _safeCall() async{
     try{
-      final result = await impakRetro.call(
+      final result = await impakRetro.typeSafeFormDataCall(
           path: Constants.SAMPLE_PATH1,
           method: RequestMethod.GET,
+          formData: ImpakRetroFormData({
+            "data": "",
+            "dlfd ": ""
+          }),
           queryParameters: {
             "param1": 3,
             'param2': "other params"
           },
           baseUrl: Constants.BASE_URL,
           authorizationToken: "Bearer ${Constants.TOKEN1}",
+        successFromJson: (json) => Response.fromJson(json),
       );
 
       if(result.isSuccessful){
         ///Response is my custom model and has a field `data`
         ///`asBody` returns a dynamic result that matches `Response` model
-        _result = Response.fromJson(result.asBody).data;
+        _result = result.asBody.data;//Response.fromJson(result.asBody).data;
         ///OR
         ///
-        _result = result.asBody["data"];
+        //_result = result.asBody["data"];
       }else {
         error = result.asError.toString(); //asError returns a dynamic data which conforms to what the api returns when there is an error
       }
 
     }catch(e){
-      if(e.runtimeType is ImpakRetroException){
-        e as ImpakRetroException;
+      if(e is ImpakRetroException){
         error = e.message;
-        print(e.statusCode);
         switch(e.type){
           case ExceptionType.TIMEOUT_ERROR:
             //Custom implementation
@@ -103,6 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
           case ExceptionType.CONNECTION_ERROR:
             //Custom implementation
         }
+      }else{
+        setState(() {
+         // error = e.toString();
+        });
       }
     }
   }

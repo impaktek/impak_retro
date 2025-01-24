@@ -1,6 +1,5 @@
 
 // ignore_for_file: overridden_field
-import 'impak_retro_exceptions.dart';
 
 /// A sealed base class representing a generic response.
 ///
@@ -99,29 +98,5 @@ class ImpakRetroFailure extends ImpakRetroResponse<Never> {
   @override
   String toString() {
     return 'ImpakRetroFailure(statusCode: $statusCode, exception: $error)';
-  }
-}
-
-/// Represents a response that encapsulates an exception.
-///
-/// This class is useful for scenarios where a specific [ImpakRetroException]
-/// provides more context about the error.
-class ImpakdioError extends ImpakRetroResponse<Never> {
-  /// The exception associated with the error.
-  final ImpakRetroException exception;
-
-
-  /// Creates an [ImpakdioError] with the given [statusCode] and [exception].
-  ///
-  /// - [statusCode] is required.
-  /// - [exception] is required and provides details about the error.
-  ImpakdioError({
-    required super.statusCode,
-    required this.exception,
-  });
-
-  @override
-  String toString() {
-    return 'ImpakdioError(statusCode: $statusCode, exception: $exception)';
   }
 }

@@ -7,7 +7,6 @@ import 'package:impak_retro/config/impak_retro_form_data.dart';
 import 'impak.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 
 part 'config/impak_retro_config.dart';
 
@@ -192,15 +191,13 @@ class ImpakRetro {
       } else {
         return ImpakRetroFailure(error: result.error, statusCode: result.statusCode);
       }
-    } on ImpakRetroException catch (e) {
-      return ImpakdioError(exception: e, statusCode: e.statusCode);
+    } on ImpakRetroException catch (_) {
+      rethrow;
     } catch (e) {
-      throw ImpakdioError(
+      throw ImpakRetroException(
           statusCode: null,
-          exception: ImpakRetroException(
-              statusCode: null,
-              ExceptionType.UNKNOWN_ERROR,
-              message: e.toString()));
+          ExceptionType.UNKNOWN_ERROR,
+          message: e.toString());
     }
   }
 
@@ -262,15 +259,13 @@ class ImpakRetro {
       } else {
         return ImpakRetroFailure(error: result.error, statusCode: result.statusCode);
       }
-    } on ImpakRetroException catch (e) {
-      return ImpakdioError(exception: e, statusCode: e.statusCode);
+    } on ImpakRetroException catch (_) {
+      rethrow;
     } catch (e) {
-      throw ImpakdioError(
+      throw ImpakRetroException(
           statusCode: null,
-          exception: ImpakRetroException(
-              statusCode: null,
-              ExceptionType.UNKNOWN_ERROR,
-              message: e.toString()));
+          ExceptionType.UNKNOWN_ERROR,
+          message: e.toString());
     }
   }
 
@@ -299,9 +294,6 @@ class ImpakRetro {
     Map<String, dynamic>? queryParameters,
   }) async {
     if (_config.combineBaseUrls(_baseUrl, baseUrl) == null) {
-      if (kDebugMode) {
-        Logger().d("Base URL was not set. You can set it using the init method or as a constructor argument to ImpakRetro or pass it to call method");
-      }
       throw (ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: 400, message: "Base URL cannot be null"));
     }
 
@@ -392,9 +384,6 @@ class ImpakRetro {
     Map<String, dynamic>? queryParameters,
   }) async {
     if (_config.combineBaseUrls(_baseUrl, baseUrl) == null) {
-      if (kDebugMode) {
-        Logger().d("Base URL was not set. You can set it using the init method or as a constructor argument to ImpakRetro or pass it to call method");
-      }
       throw (ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: 400, message: "Base URL cannot be null"));
     }
     var token = authorizationToken;
