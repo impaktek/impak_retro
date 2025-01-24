@@ -1,7 +1,7 @@
 name: impak_retro
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-homepage: https://github.com/impaktek/impakdio
+description: "An Network Request Package base on Dio".
+version: 1.0.0+0
+homepage: https://github.com/impaktek/impak_retro
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
