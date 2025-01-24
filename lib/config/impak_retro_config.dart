@@ -226,6 +226,6 @@ class _ImpakRetroConfig {
     );
 
     final response = await _dio.fetch(requestOptions);
-    return response.data;
+    return response;
   }
 }

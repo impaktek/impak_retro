@@ -1,6 +1,6 @@
 name: impak_retro
 description: "An Network Request Package base on Dio"
-version: 1.0.0+1
+version: 1.0.0+2
 homepage: https://github.com/impaktek/impak_retro
 
 environment:
