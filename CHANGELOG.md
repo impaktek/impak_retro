@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.2] - 2025-01-24
+## [1.1.0] - 2025-01-24
 ### Added
 - **HTTP Request Handling:**
     - Ability to make HTTP requests (GET, POST, etc.) with or without authentication.

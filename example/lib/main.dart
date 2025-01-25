@@ -59,7 +59,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _safeCall() async{
     try{
-      final result = await impakRetro.typeSafeFormDataCall(
+      final result = await impakRetro.call(
+          path: "/auth/login",
+          baseUrl: 'https://agent.api.onemoni.com/api/v1',
+          method: RequestMethod.POST,
+          body: {"username": 'takonajie', "password": 'ABab12.'},);
+      if(result.isSuccessful){
+
+      }else{
+        error = result.error["error"];
+      }
+      /*final result = await impakRetro.typeSafeFormDataCall(
           path: Constants.SAMPLE_PATH1,
           method: RequestMethod.GET,
           formData: ImpakRetroFormData({
@@ -84,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //_result = result.asBody["data"];
       }else {
         error = result.asError.toString(); //asError returns a dynamic data which conforms to what the api returns when there is an error
-      }
+      }*/
 
     }catch(e){
       if(e is ImpakRetroException){
@@ -141,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
         error = null;
       }else {
         _response = [];
-        error = result.error["message"];
+        error = result.asError["message"];
       }
 
     } catch(e){
@@ -218,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _call,
+        onPressed: _safeCall,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), 
