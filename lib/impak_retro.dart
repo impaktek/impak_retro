@@ -328,7 +328,7 @@ class ImpakRetro {
       if (e.type == DioExceptionType.badResponse) {
         final response = e.response;
         if (response?.statusCode == 401 || response?.statusCode == 403) {
-          return ImpakResponse(error: e.response?.data, statusCode: e.response?.statusCode);
+          return ImpakResponse(error: response?.data, statusCode: e.response?.statusCode);
         }
 
         if (response?.statusCode != null && response!.statusCode! > 499) {

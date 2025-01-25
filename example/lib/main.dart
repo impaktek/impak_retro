@@ -59,15 +59,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _safeCall() async{
     try{
-      final result = await impakRetro.call(
+      final result = await impakRetro.typeSafeCall(
           path: "/auth/login",
           baseUrl: 'https://agent.api.onemoni.com/api/v1',
           method: RequestMethod.POST,
-          body: {"username": 'takonajie', "password": 'ABab12.'},);
+
+          body: {"username": 'takonajie', "password": 'ABab12.'}, successFromJson: (json) => Response.fromJson(json),);
       if(result.isSuccessful){
 
       }else{
-        error = result.error["error"];
+        error = result.asError["error"];
       }
       /*final result = await impakRetro.typeSafeFormDataCall(
           path: Constants.SAMPLE_PATH1,

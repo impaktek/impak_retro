@@ -94,7 +94,7 @@ class ImpakRetroFailure extends ImpakRetroResponse<Never> {
   ImpakRetroFailure({
     required super.statusCode,
     required this.error,
-  });
+  }): super(failure: error);
   @override
   String toString() {
     return 'ImpakRetroFailure(statusCode: $statusCode, exception: $error)';

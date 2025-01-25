@@ -1,6 +1,6 @@
 name: impak_retro
 description: "ImpakRetro is a powerful Dart library for handling HTTP requests. Built on top of the [Dio](https://pub.dev/packages/dio) package, it offers a type-safe, configurable, and easy-to-use interface for interacting with APIs."
-version: 1.1.0
+version: 1.1.1
 homepage: https://github.com/impaktek/impak_retro
 
 environment:
