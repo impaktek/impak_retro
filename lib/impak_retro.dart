@@ -327,9 +327,9 @@ class ImpakRetro {
       }
       if (e.type == DioExceptionType.badResponse) {
         final response = e.response;
-        if (response?.statusCode == 401 || response?.statusCode == 403) {
+        /*if (response?.statusCode == 401 || response?.statusCode == 403) {
           throw(ImpakRetroException(ExceptionType.AUTHORISATION_ERROR, message: "Unauthorized request", statusCode: e.response?.statusCode));
-        }
+        }*/
 
         if (response?.statusCode != null && response!.statusCode! > 499) {
           final error = ImpakRetroException(ExceptionType.SERVER_ERROR, statusCode: e.response?.statusCode, message: "Server returned an error. Check server status", );

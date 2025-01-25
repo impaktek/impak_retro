@@ -22,7 +22,7 @@ Add `impak_retro` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  impak_retro: ^1.0.1+0
+  impak_retro: ^1.0.1+1
 ```
 Then run `flutter pub get` to install the package.
 
@@ -102,10 +102,6 @@ The `ImpakRetro` class provides a `typeSafeCall` method for making type-safe HTT
           error = result.error.toString();
         });
         break;
-      case ImpakdioError():
-        setState(() {
-          error = result.exception.message;
-        });
 
     }
   }catch(e){
@@ -172,10 +168,6 @@ The `ImpakRetro` class provides a `typeSafeCall` method for making type-safe HTT
             error = result.error.toString();
           });
           break;
-        case ImpakdioError():
-          setState(() {
-            error = result.exception.message;
-          });
 
       }
     }catch(e){

@@ -57,19 +57,19 @@ class _ImpakRetroConfig {
     }
 
     final requestOptions = Options(
-        method: _methodConverter(method),
-        receiveTimeout: _getDuration(receiveTimeout, timeUnit),
-        sendTimeout: _getDuration(sendTimeout, timeUnit),
-        headers: header,
-        extra: extra,
-        contentType: formData != null ? 'multipart/form-data' : null)
+            method: _methodConverter(method),
+            receiveTimeout: _getDuration(receiveTimeout, timeUnit),
+            sendTimeout: _getDuration(sendTimeout, timeUnit),
+            headers: header,
+            extra: extra,
+            contentType: formData != null ? 'multipart/form-data' : null)
         .compose(
-        _dio.options,
-        queryParameters: params,
-        path,
-        data: body ?? formData,
-        onSendProgress: onProgress,
-        cancelToken: canceller?.cancelToken)
+            _dio.options,
+            queryParameters: params,
+            path,
+            data: body ?? formData,
+            onSendProgress: onProgress,
+            cancelToken: canceller?.cancelToken)
         .copyWith(baseUrl: baseUrl);
 
     if (T != dynamic &&

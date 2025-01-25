@@ -72,8 +72,11 @@ class ImpakRetroFormData {
     // Return a MultipartFile created from the file's bytes.
     return MultipartFile.fromBytes(
       byte,
-      filename: file.path.split('/').last, // Extract the file name from the file path.
-      contentType: MediaType('application', 'octet-stream'), // Set the content type.
+      filename: file.path
+          .split('/')
+          .last, // Extract the file name from the file path.
+      contentType:
+          MediaType('application', 'octet-stream'), // Set the content type.
     );
   }
 }
