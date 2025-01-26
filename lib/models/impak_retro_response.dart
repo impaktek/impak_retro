@@ -1,4 +1,3 @@
-
 // ignore_for_file: overridden_field
 
 /// A sealed base class representing a generic response.
@@ -47,14 +46,15 @@ sealed class ImpakRetroResponse<T> {
 class ImpakResponse extends ImpakRetroResponse<dynamic> {
   final dynamic data;
   final dynamic error;
+
   /// Creates an [ImpakResponse] with the given [statusCode], [data], and [error].
-  ImpakResponse({required super.statusCode, this.data, this.error}): super(success: data, failure: error);
+  ImpakResponse({required super.statusCode, this.data, this.error})
+      : super(success: data, failure: error);
 
   @override
   String toString() {
     return 'ImpakResponse(statusCode: $statusCode, exception: $data, error: $error)';
   }
-
 }
 
 /// Represents a successful response with typed data.
@@ -94,7 +94,7 @@ class ImpakRetroFailure extends ImpakRetroResponse<Never> {
   ImpakRetroFailure({
     required super.statusCode,
     required this.error,
-  }): super(failure: error);
+  }) : super(failure: error);
   @override
   String toString() {
     return 'ImpakRetroFailure(statusCode: $statusCode, exception: $error)';

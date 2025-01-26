@@ -175,7 +175,8 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = successFromJson(result.data); // Parse the data using the provided function.
+          final data = successFromJson(
+              result.data); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
@@ -189,15 +190,14 @@ class ImpakRetro {
               message: e.toString());
         }
       } else {
-        return ImpakRetroFailure(error: result.error, statusCode: result.statusCode);
+        return ImpakRetroFailure(
+            error: result.error, statusCode: result.statusCode);
       }
     } on ImpakRetroException catch (_) {
       rethrow;
     } catch (e) {
       throw ImpakRetroException(
-          statusCode: null,
-          ExceptionType.UNKNOWN_ERROR,
-          message: e.toString());
+          statusCode: null, ExceptionType.UNKNOWN_ERROR, message: e.toString());
     }
   }
 
@@ -243,7 +243,8 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = successFromJson(result.data); // Parse the data using the provided function.
+          final data = successFromJson(
+              result.data); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
@@ -257,15 +258,14 @@ class ImpakRetro {
               message: e.toString());
         }
       } else {
-        return ImpakRetroFailure(error: result.error, statusCode: result.statusCode);
+        return ImpakRetroFailure(
+            error: result.error, statusCode: result.statusCode);
       }
     } on ImpakRetroException catch (_) {
       rethrow;
     } catch (e) {
       throw ImpakRetroException(
-          statusCode: null,
-          ExceptionType.UNKNOWN_ERROR,
-          message: e.toString());
+          statusCode: null, ExceptionType.UNKNOWN_ERROR, message: e.toString());
     }
   }
 
@@ -294,7 +294,8 @@ class ImpakRetro {
     Map<String, dynamic>? queryParameters,
   }) async {
     if (_config.combineBaseUrls(_baseUrl, baseUrl) == null) {
-      throw (ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: 400, message: "Base URL cannot be null"));
+      throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+          statusCode: 400, message: "Base URL cannot be null"));
     }
 
     var token = authorizationToken;
@@ -320,42 +321,65 @@ class ImpakRetro {
 
       return ImpakResponse(statusCode: result.statusCode, data: result.data);
     } on TimeoutException catch (_) {
-      throw(ImpakRetroException(ExceptionType.TIMEOUT_ERROR, statusCode: null, message: "Request timed out"));
+      throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+          statusCode: null, message: "Request timed out"));
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
-        throw(ImpakRetroException(ExceptionType.CANCELLED_ERROR, message: "Request was cancelled by user", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.CANCELLED_ERROR,
+            message: "Request was cancelled by user",
+            statusCode: e.response?.statusCode));
       }
       if (e.type == DioExceptionType.badResponse) {
         final response = e.response;
         if (response?.statusCode == 401 || response?.statusCode == 403) {
-          return ImpakResponse(error: response?.data, statusCode: e.response?.statusCode);
+          return ImpakResponse(
+              error: response?.data, statusCode: e.response?.statusCode);
         }
 
         if (response?.statusCode != null && response!.statusCode! > 499) {
-          final error = ImpakRetroException(ExceptionType.SERVER_ERROR, statusCode: e.response?.statusCode, message: "Server returned an error. Check server status", );
-          throw(error);
+          final error = ImpakRetroException(
+            ExceptionType.SERVER_ERROR,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status",
+          );
+          throw (error);
         }
         if (response != null) {
-          return ImpakResponse(error: e.response?.data, statusCode: e.response?.statusCode);
+          return ImpakResponse(
+              error: e.response?.data, statusCode: e.response?.statusCode);
         }
-        throw(ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: e.response?.statusCode, message: "Server returned an error. Check server status"));
+        throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status"));
       }
 
-      if (e.type == DioExceptionType.receiveTimeout || e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.sendTimeout) {
-        throw(ImpakRetroException(ExceptionType.TIMEOUT_ERROR, message: "Request timed out", statusCode: e.response?.statusCode));
+      if (e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+            message: "Request timed out", statusCode: e.response?.statusCode));
       }
       if (e.type == DioExceptionType.connectionError) {
-        throw(ImpakRetroException(ExceptionType.CONNECTION_ERROR, message: "Failed to connect to server. Check internet connection", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.CONNECTION_ERROR,
+            message: "Failed to connect to server. Check internet connection",
+            statusCode: e.response?.statusCode));
       }
 
       if (e.type == DioExceptionType.unknown) {
-        throw(ImpakRetroException(ExceptionType.UNKNOWN_ERROR, message: "An unknown error occurred", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+            message: "An unknown error occurred",
+            statusCode: e.response?.statusCode));
       }
 
-      throw(ImpakRetroException(ExceptionType.SERVER_ERROR, message: "A server error occurred", statusCode: e.response?.statusCode));
-    }
-    on Object catch (exception) {
-      throw(ImpakRetroException(ExceptionType.UNKNOWN_ERROR, message: exception.toString(), statusCode: null), statusCode: null);
+      throw (ImpakRetroException(ExceptionType.SERVER_ERROR,
+          message: "A server error occurred",
+          statusCode: e.response?.statusCode));
+    } on Object catch (exception) {
+      throw (
+        ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+            message: exception.toString(), statusCode: null),
+        statusCode: null
+      );
     }
   }
 
@@ -384,7 +408,8 @@ class ImpakRetro {
     Map<String, dynamic>? queryParameters,
   }) async {
     if (_config.combineBaseUrls(_baseUrl, baseUrl) == null) {
-      throw (ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: 400, message: "Base URL cannot be null"));
+      throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+          statusCode: 400, message: "Base URL cannot be null"));
     }
     var token = authorizationToken;
     if (useAuthToken && authorizationToken == null) {
@@ -409,42 +434,63 @@ class ImpakRetro {
 
       return ImpakResponse(statusCode: result.statusCode, data: result.data);
     } on TimeoutException catch (_) {
-      throw(ImpakRetroException(ExceptionType.TIMEOUT_ERROR, statusCode: null, message: "Request timed out"));
+      throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+          statusCode: null, message: "Request timed out"));
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
-        throw(ImpakRetroException(ExceptionType.CANCELLED_ERROR, message: "Request was cancelled by user", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.CANCELLED_ERROR,
+            message: "Request was cancelled by user",
+            statusCode: e.response?.statusCode));
       }
       if (e.type == DioExceptionType.badResponse) {
         final response = e.response;
         if (response?.statusCode == 401 || response?.statusCode == 403) {
-          throw(ImpakRetroException(ExceptionType.AUTHORISATION_ERROR, message: "Unauthorized request", statusCode: e.response?.statusCode));
+          throw (ImpakRetroException(ExceptionType.AUTHORISATION_ERROR,
+              message: "Unauthorized request",
+              statusCode: e.response?.statusCode));
         }
 
         if (response?.statusCode != null && response!.statusCode! > 499) {
-          final error = ImpakRetroException(ExceptionType.SERVER_ERROR, statusCode: e.response?.statusCode, message: "Server returned an error. Check server status", );
-          throw(error);
+          final error = ImpakRetroException(
+            ExceptionType.SERVER_ERROR,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status",
+          );
+          throw (error);
         }
         if (response != null) {
-          return ImpakResponse(error: e.response?.data, statusCode: e.response?.statusCode);
+          return ImpakResponse(
+              error: e.response?.data, statusCode: e.response?.statusCode);
         }
-        throw(ImpakRetroException(ExceptionType.BAD_REQUEST, statusCode: e.response?.statusCode, message: "Server returned an error. Check server status"));
+        throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status"));
       }
 
-      if (e.type == DioExceptionType.receiveTimeout || e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.sendTimeout) {
-        throw(ImpakRetroException(ExceptionType.TIMEOUT_ERROR, message: "Request timed out", statusCode: e.response?.statusCode));
+      if (e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+            message: "Request timed out", statusCode: e.response?.statusCode));
       }
       if (e.type == DioExceptionType.connectionError) {
-        throw(ImpakRetroException(ExceptionType.CONNECTION_ERROR, message: "Failed to connect to server. Check internet connection", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.CONNECTION_ERROR,
+            message: "Failed to connect to server. Check internet connection",
+            statusCode: e.response?.statusCode));
       }
 
       if (e.type == DioExceptionType.unknown) {
-        throw(ImpakRetroException(ExceptionType.UNKNOWN_ERROR, message: "An unknown error occurred", statusCode: e.response?.statusCode));
+        throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+            message: "An unknown error occurred",
+            statusCode: e.response?.statusCode));
       }
 
-      throw(ImpakRetroException(ExceptionType.SERVER_ERROR, message: "A server error occurred", statusCode: e.response?.statusCode));
-    }
-    on Object catch (exception) {
-      throw(ImpakRetroException(ExceptionType.UNKNOWN_ERROR, message: exception.toString(), statusCode: null));
+      throw (ImpakRetroException(ExceptionType.SERVER_ERROR,
+          message: "A server error occurred",
+          statusCode: e.response?.statusCode));
+    } on Object catch (exception) {
+      throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+          message: exception.toString(), statusCode: null));
     }
   }
 }

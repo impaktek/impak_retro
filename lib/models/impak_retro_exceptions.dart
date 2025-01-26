@@ -1,8 +1,8 @@
 /// A custom exception class to handle specific errors in the application.
-/// 
-/// This class implements the [Exception] interface and provides additional 
+///
+/// This class implements the [Exception] interface and provides additional
 /// information about the error through its type, message, and status code.
-class ImpakRetroException{
+class ImpakRetroException {
   /// A user-defined message that describes the exception.
   final String? message;
 
@@ -12,7 +12,7 @@ class ImpakRetroException{
   /// The HTTP status code associated with the exception, if applicable.
   final int? statusCode;
 
-  /// Creates an [ImpakRetroException] with the specified [type], [message], 
+  /// Creates an [ImpakRetroException] with the specified [type], [message],
   /// and [statusCode].
   ///
   /// The [type] is required, while [message] and [statusCode] are optional.
