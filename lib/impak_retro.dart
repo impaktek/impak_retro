@@ -3,10 +3,11 @@ library;
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:impak_retro/config/impak_retro_form_data.dart';
-import 'impak.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter/foundation.dart';
+import 'package:impak_retro/config/impak_retro_form_data.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'impak.dart';
 
 part 'config/impak_retro_config.dart';
 
@@ -493,4 +494,154 @@ class ImpakRetro {
           message: exception.toString(), statusCode: null));
     }
   }
+
+  Future<dynamic> download({
+    required String path,
+    required String savePath,
+    void Function(ReceivedDownloadSize, TotalDownloadSize)? onProgress,
+    Canceller? canceller,
+  }) async {
+    try {
+      return await _dio.download(path, savePath, onReceiveProgress: onProgress);
+    } on TimeoutException catch (_) {
+      throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+          statusCode: null, message: "Request timed out"));
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        throw (ImpakRetroException(ExceptionType.CANCELLED_ERROR,
+            message: "Request was cancelled by user",
+            statusCode: e.response?.statusCode));
+      }
+      if (e.type == DioExceptionType.badResponse) {
+        final response = e.response;
+        if (response?.statusCode == 401 || response?.statusCode == 403) {
+          throw (ImpakRetroException(ExceptionType.AUTHORISATION_ERROR,
+              message: "Unauthorized request",
+              statusCode: e.response?.statusCode));
+        }
+
+        if (response?.statusCode != null && response!.statusCode! > 499) {
+          final error = ImpakRetroException(
+            ExceptionType.SERVER_ERROR,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status",
+          );
+          throw (error);
+        }
+
+        throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status"));
+      }
+
+      if (e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+            message: "Request timed out", statusCode: e.response?.statusCode));
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        throw (ImpakRetroException(ExceptionType.CONNECTION_ERROR,
+            message: "Failed to connect to server. Check internet connection",
+            statusCode: e.response?.statusCode));
+      }
+
+      if (e.type == DioExceptionType.unknown) {
+        throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+            message: "An unknown error occurred",
+            statusCode: e.response?.statusCode));
+      }
+
+      throw (ImpakRetroException(ExceptionType.SERVER_ERROR,
+          message: "A server error occurred",
+          statusCode: e.response?.statusCode));
+    } on Object catch (exception) {
+      throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+          message: exception.toString(), statusCode: null));
+    }
+  }
+
+  /*Stream<Uint8List> downloadFile(String path,
+      {Function(ReceivedDownloadSize)? onProgress}) async* {
+    try {
+      final response = await _dio.get<ResponseBody>(
+        path,
+        options: Options(responseType: ResponseType.stream),
+      );
+
+      final contentLengthStr = response.headers.map['content-length']?.first;
+      final total =
+          contentLengthStr != null ? int.tryParse(contentLengthStr) ?? -1 : -1;
+      int received = 0;
+
+      if (response.statusCode == 200) {
+        await for (final chunk in response.data!.stream) {
+          if (total != -1) {
+            received += chunk.length;
+            final progress = (received / total) * 100;
+            onProgress?.call(progress.toInt());
+          }
+          yield Uint8List.fromList(chunk);
+        }
+      }
+    } on TimeoutException catch (_) {
+      throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+          statusCode: null, message: "Request timed out"));
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        throw (ImpakRetroException(ExceptionType.CANCELLED_ERROR,
+            message: "Request was cancelled by user",
+            statusCode: e.response?.statusCode));
+      }
+      if (e.type == DioExceptionType.badResponse) {
+        final response = e.response;
+        if (response?.statusCode == 401 || response?.statusCode == 403) {
+          throw (ImpakRetroException(ExceptionType.AUTHORISATION_ERROR,
+              message: "Unauthorized request",
+              statusCode: e.response?.statusCode));
+        }
+
+        if (response?.statusCode != null && response!.statusCode! > 499) {
+          final error = ImpakRetroException(
+            ExceptionType.SERVER_ERROR,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status",
+          );
+          throw (error);
+        }
+
+        throw (ImpakRetroException(ExceptionType.BAD_REQUEST,
+            statusCode: e.response?.statusCode,
+            message: "Server returned an error. Check server status"));
+      }
+
+      if (e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw (ImpakRetroException(ExceptionType.TIMEOUT_ERROR,
+            message: "Request timed out", statusCode: e.response?.statusCode));
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        throw (ImpakRetroException(ExceptionType.CONNECTION_ERROR,
+            message: "Failed to connect to server. Check internet connection",
+            statusCode: e.response?.statusCode));
+      }
+
+      if (e.type == DioExceptionType.unknown) {
+        throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+            message: "An unknown error occurred",
+            statusCode: e.response?.statusCode));
+      }
+
+      throw (ImpakRetroException(ExceptionType.SERVER_ERROR,
+          message: "A server error occurred",
+          statusCode: e.response?.statusCode));
+    } on Object catch (exception) {
+      throw (ImpakRetroException(ExceptionType.UNKNOWN_ERROR,
+          message: exception.toString(), statusCode: null));
+    }
+  }*/
 }
+
+typedef ReceivedDownloadSize = int;
+typedef TotalDownloadSize = int;
