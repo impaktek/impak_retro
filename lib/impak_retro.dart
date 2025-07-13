@@ -176,8 +176,7 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = successFromJson(
-              result.data); // Parse the data using the provided function.
+          final data = await compute(successFromJson, result.data); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
@@ -244,8 +243,7 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = successFromJson(
-              result.data); // Parse the data using the provided function.
+          final data = await compute(successFromJson, result.data); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.

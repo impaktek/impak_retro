@@ -1,6 +1,6 @@
 name: impak_retro
 description: "ImpakRetro is a Dart library built on Dio, offering a type-safe, configurable, and user-friendly interface for handling HTTP requests and interacting with APIs."
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/impaktek/impak_retro
 
 environment:
@@ -10,20 +10,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^5.7.0
+  dio: ^5.8.0+1
   pretty_dio_logger: ^1.4.0
-  logger: ^2.5.0
+  logger: ^2.6.0
   http_parser: ^4.1.2
   os_mime_type: ^0.0.2
 
 dev_dependencies:
-  lints: ^5.0.0
+  lints: ^6.0.0
   test: ^1.24.0
-  mockito: ^5.0.0
+  mockito: ^5.4.6
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  build_runner: ^2.4.13
+  flutter_lints: ^6.0.0
+  build_runner: ^2.5.4
 
 flutter:
   uses-material-design: true
