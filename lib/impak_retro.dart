@@ -1,6 +1,7 @@
 library;
 
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -97,7 +98,7 @@ class ImpakRetro {
   /// - `authToken`: A global authorization token for all requests (default: null).
   /// - `timeout`: Timeout for API requests in seconds (default: null).
   /// - `timeUnit`: Time unit for timeout (default: `TimeUnit.SECONDS`).
-  init({
+  void init({
     bool useLogger = true,
     String? baseUrl,
     Interceptor? loggingInterceptor,
@@ -130,7 +131,7 @@ class ImpakRetro {
   /// Sets the authorization token for all requests.
   ///
   /// This token will be used for all requests made by `ImpakRetro` unless another token is explicitly passed to a request.
-  static setAuthToken(String authToken) {
+  static void setAuthToken(String authToken) {
     _authToken = authToken;
   }
 
@@ -176,7 +177,7 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = await compute(successFromJson, result.data); // Parse the data using the provided function.
+          final data = await Isolate.run(()=> successFromJson(result.data)); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
@@ -243,7 +244,7 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = await compute(successFromJson, result.data); // Parse the data using the provided function.
+          final data = await Isolate.run(()=> successFromJson(result.data));// Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
