@@ -23,7 +23,7 @@ Add `impak_retro` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  impak_retro: ^2.1.0
+  impak_retro: ^2.1.1
 ```
 Then run `flutter pub get` to install the package.
 
