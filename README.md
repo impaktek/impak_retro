@@ -13,6 +13,7 @@ ImpakRetro is a powerful Dart library for handling HTTP requests. Built on top o
 - **Singleton Support**: Maintain a single `ImpakRetro` instance across your application.
 - **File Uploads**: Built-in support for form-data and file uploads.
 - **Flexible Configuration**: Customize base URLs, headers, and request parameters.
+- **Client lifecycle interceptors**: Register Dio-compatible hooks for pre-request work (tokens, refresh) and post-response / post-error work (401 handling, logging) via `ImpakRetroClientInterceptor` or `ImpakRetroClientInterceptorCallbacks`.
 
 ---
 
@@ -22,7 +23,7 @@ Add `impak_retro` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  impak_retro: ^2.0.1
+  impak_retro: ^2.1.0
 ```
 Then run `flutter pub get` to install the package.
 
@@ -57,6 +58,7 @@ final impakRetro = ImpakRetro(
   authToken: "your_auth_token", //optional
   timeout: 30, //optional
   timeUnit: TimeUnit.SECONDS, //optional
+  // clientInterceptors: [ ImpakRetroClientInterceptorCallbacks(...) ], //optional; see Client lifecycle interceptors
 );
 ```
 
@@ -67,7 +69,106 @@ example
 ImpakRetro.setAuthToken("Bearer $token");
 ```
 
-### 2. Making Requests
+### 2. Client lifecycle interceptors
+
+You can attach one or more Dio [`Interceptor`](https://pub.dev/documentation/dio/latest/dio/Interceptor-class.html) instances when you construct `ImpakRetro` or call `init`, using the **`clientInterceptors`** parameter. Types such as [`Interceptor`](https://pub.dev/documentation/dio/latest/dio/Interceptor-class.html), [`RequestOptions`](https://pub.dev/documentation/dio/latest/dio/RequestOptions-class.html), [`DioException`](https://pub.dev/documentation/dio/latest/dio/DioException-class.html), and [`Dio`](https://pub.dev/documentation/dio/latest/dio/Dio-class.html) are **re-exported** from `package:impak_retro/impak.dart`, so your app does **not** need a direct `dio` dependency for interceptors. They are inserted **before** the optional HTTP logger: on the way out they run **first** (good for attaching or refreshing tokens); on the way back Dio runs them **last** after the logger (good for global response or error policies).
+
+Pass **`null`** for `clientInterceptors` on a later `init` to leave the current client interceptors unchanged. Pass **`[]`** to remove interceptors that were registered through this parameter on a previous `init`. Pass a **non-empty list** to replace that set.
+
+The library provides:
+
+- **`ImpakRetroClientInterceptor`** — subclass and override `beforeRequest`, `afterResponse`, and/or `afterError`.
+- **`ImpakRetroClientInterceptorCallbacks`** — supply closures for the same three phases when you prefer not to subclass.
+
+Each hook **must** end by calling exactly one of **`handler.next`**, **`handler.reject`**, or **`handler.resolve`** on the handler Dio gives you (same rules as a normal Dio interceptor). Omitted callbacks behave like the defaults and simply forward with `next`.
+
+#### `ImpakRetroClientInterceptorCallbacks` (recommended for app wiring)
+
+The callback class exposes three optional hooks:
+
+| Callback | When it runs | Typical uses |
+|----------|----------------|----------------|
+| `onBeforeRequest` | After options are composed, before the request is sent | Check or refresh access token, set `options.headers['Authorization']`, add trace headers |
+| `onAfterResponse` | After a response object is received (any HTTP status) | Audit logging, normalize headers, inspect `response.statusCode` before ImpakRetro maps the body |
+| `onAfterError` | When Dio surfaces an error | Global 401/403 → sign out or navigate to login, refresh token + `handler.resolve` on a retried request |
+
+Example with **all three** callbacks (your app would inject services instead of inline comments):
+
+```dart
+import 'package:impak_retro/impak.dart';
+
+final impakRetro = ImpakRetro(
+  baseUrl: 'https://api.example.com',
+  authToken: 'Bearer $accessToken',
+  clientInterceptors: [
+    ImpakRetroClientInterceptorCallbacks(
+      onBeforeRequest: (options, handler) async {
+        // Pre-request: e.g. await tokenRepository.ensureValidAccessToken();
+        // options.headers['Authorization'] = 'Bearer ${tokenRepository.accessToken}';
+        handler.next(options);
+      },
+      onAfterResponse: (response, handler) async {
+        // Post-response: e.g. logging, metrics
+        // if (response.statusCode == 204) { ... }
+        handler.next(response);
+      },
+      onAfterError: (err, handler) async {
+        final code = err.response?.statusCode;
+        if (code == 401 || code == 403) {
+          // Post-error: e.g. navigator to login, clear session
+          // For refresh-and-retry, obtain a new token, clone err.requestOptions,
+          // call dio.fetch, then handler.resolve(retryResponse).
+        }
+        handler.next(err);
+      },
+    ),
+  ],
+);
+```
+
+Using the **singleton** and `init`:
+
+```dart
+ImpakRetro.instance.init(
+  baseUrl: 'https://api.example.com',
+  authToken: 'Bearer $accessToken',
+  clientInterceptors: [
+    ImpakRetroClientInterceptorCallbacks(
+      onBeforeRequest: (options, handler) async {
+        handler.next(options);
+      },
+    ),
+  ],
+);
+```
+
+#### Subclassing `ImpakRetroClientInterceptor`
+
+For larger apps you can extend the base class and override `beforeRequest`, `afterResponse`, or `afterError` instead of using callbacks.
+
+```dart
+import 'package:impak_retro/impak.dart';
+
+class AuthLifecycleInterceptor extends ImpakRetroClientInterceptor {
+  @override
+  Future<void> beforeRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    handler.next(options);
+  }
+
+  @override
+  Future<void> afterError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    handler.next(err);
+  }
+}
+```
+
+### 3. Making Requests
 
 The `ImpakRetro` class provides a `typeSafeCall` method for making type-safe HTTP requests, `typeSafeFormDataCall` for making type-safe `form-data` request as well raw requests using the `call` or `formDataCall` methods.
 
@@ -306,7 +407,7 @@ The `ImpakRetro` class provides a `typeSafeCall` method for making type-safe HTT
     }
 ```
 
-## 5. Exception Handling with `ImpakRetroException`
+### 4. Exception Handling with `ImpakRetroException`
 The exceptions that are thrown during a request are instances of ImpakRetroException, which contains an `ExceptionType` enum. Use the switch statement to handle different types of exceptions:
 
 ```dart
@@ -366,4 +467,3 @@ If you'd like to contribute to this project, feel free to fork the repository, m
 ## License
 
 This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
-# impakdio

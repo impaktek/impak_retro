@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0] - 2026-05-24
+
+### Added
+
+- **Client lifecycle interceptors:** `ImpakRetroClientInterceptor` and `ImpakRetroClientInterceptorCallbacks` for pre-request (`beforeRequest`), post-response (`afterResponse`), and post-error (`afterError`) hooks (token checks, refresh flows, global 401 handling, etc.).
+- **`clientInterceptors` on `ImpakRetro` / `init`:** register, replace, or clear client interceptors (inserted before the optional HTTP logger).
+- **Dio type re-exports:** `lib/export/impak_http.dart` exported from `package:impak_retro/impak.dart` so apps can implement interceptors without a direct `dio` dependency.
+
+### Notes
+
+- See README **Client lifecycle interceptors** for usage and the example app for `ImpakRetroClientInterceptorCallbacks`.
+
 ## [2.0.2] - 2025-07-14
 ### Added
 - **HTTP Request Handling:**

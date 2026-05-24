@@ -52,6 +52,10 @@ class ImpakRetro {
   /// If set, this token will be used for all requests unless a specific token is passed to a request.
   static String? _authToken;
 
+  /// Interceptors registered via [init] `clientInterceptors` so they can be replaced
+  /// on the next `init` when that parameter is non-null.
+  final List<Interceptor> _registeredClientInterceptors = [];
+
   /// Constructor for initializing `ImpakRetro` instance.
   ///
   /// - `userLogger`: A boolean to enable logging of requests and responses (default: true).
@@ -60,6 +64,7 @@ class ImpakRetro {
   /// - `authToken`: A global authorization token for all requests (default: null).
   /// - `timeout`: Timeout for API requests in seconds (default: null).
   /// - `timeUnit`: Time unit for timeout (default: `TimeUnit.SECONDS`).
+  /// - `clientInterceptors`: Optional Dio interceptors for pre/post logic; see [ImpakRetroClientInterceptor].
   ImpakRetro({
     bool userLogger = true,
     String? baseUrl,
@@ -67,6 +72,7 @@ class ImpakRetro {
     String? authToken,
     int? timeout,
     TimeUnit? timeUnit,
+    List<Interceptor>? clientInterceptors,
   }) {
     init(
       useLogger: userLogger,
@@ -75,6 +81,7 @@ class ImpakRetro {
       authToken: authToken,
       timeUnit: timeUnit,
       timeout: timeout,
+      clientInterceptors: clientInterceptors,
     );
   }
 
@@ -98,6 +105,10 @@ class ImpakRetro {
   /// - `authToken`: A global authorization token for all requests (default: null).
   /// - `timeout`: Timeout for API requests in seconds (default: null).
   /// - `timeUnit`: Time unit for timeout (default: `TimeUnit.SECONDS`).
+  /// - `clientInterceptors`: When non-null, removes any interceptors previously registered
+  ///   through this parameter, then inserts the new list at the front of [Dio.interceptors]
+  ///   (before the logger). Use an empty list to clear. When null, previously registered
+  ///   client interceptors are left unchanged.
   void init({
     bool useLogger = true,
     String? baseUrl,
@@ -105,13 +116,27 @@ class ImpakRetro {
     String? authToken,
     int? timeout,
     TimeUnit? timeUnit,
+    List<Interceptor>? clientInterceptors,
   }) {
     _baseUrl = baseUrl ?? _baseUrl;
     _timeout = timeout ?? _timeout;
     _timeUnit = timeUnit ?? _timeUnit;
 
+    if (clientInterceptors != null) {
+      for (final interceptor
+          in List<Interceptor>.from(_registeredClientInterceptors)) {
+        _dio.interceptors.remove(interceptor);
+      }
+      _registeredClientInterceptors.clear();
+      var insertIndex = 0;
+      for (final interceptor in clientInterceptors) {
+        _dio.interceptors.insert(insertIndex++, interceptor);
+        _registeredClientInterceptors.add(interceptor);
+      }
+    }
+
     // Add logger interceptor if logging is enabled or custom logging interceptor is provided.
-    if (useLogger || loggingInterceptor != null) {
+    if (useLogger) {
       _dio.interceptors.add(loggingInterceptor ??
           PrettyDioLogger(
             requestBody: true,
@@ -177,7 +202,8 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = await Isolate.run(()=> successFromJson(result.data)); // Parse the data using the provided function.
+          final data = await Isolate.run(() => successFromJson(
+              result.data)); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.
@@ -244,7 +270,8 @@ class ImpakRetro {
 
       if (result.isSuccessful) {
         try {
-          final data = await Isolate.run(()=> successFromJson(result.data));// Parse the data using the provided function.
+          final data = await Isolate.run(() => successFromJson(
+              result.data)); // Parse the data using the provided function.
           return ImpakRetroSuccess(data: data, statusCode: result.statusCode);
         } on Object catch (e, s) {
           // Log and throw mapping error if parsing fails.

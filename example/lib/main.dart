@@ -42,16 +42,66 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Post> _response = [];
 
-  //bool _result = false;
+  /// Recent lines from [ImpakRetroClientInterceptorCallbacks] (all three hooks).
+  final List<String> _interceptorEvents = [];
+
+  void _appendInterceptorLog(String line) {
+    if (!mounted) return;
+    setState(() {
+      final stamp = DateTime.now().toIso8601String();
+      _interceptorEvents.insert(0, '$stamp $line');
+      if (_interceptorEvents.length > 10) {
+        _interceptorEvents.removeLast();
+      }
+    });
+  }
+
+  /// Demo interceptors: one [ImpakRetroClientInterceptorCallbacks] using every hook.
+  List<Interceptor> _demoClientInterceptors() {
+    return [
+      ImpakRetroClientInterceptorCallbacks(
+        onBeforeRequest: (options, handler) async {
+          _appendInterceptorLog(
+            'onBeforeRequest: ${options.method} ${options.uri}',
+          );
+          // Pre-request: validate or refresh token, mutate headers, etc.
+          handler.next(options);
+        },
+        onAfterResponse: (response, handler) async {
+          _appendInterceptorLog(
+            'onAfterResponse: HTTP ${response.statusCode} '
+            '${response.requestOptions.uri}',
+          );
+          // Post-response: metrics, response shaping, status checks.
+          handler.next(response);
+        },
+        onAfterError: (err, handler) async {
+          final code = err.response?.statusCode;
+          _appendInterceptorLog(
+            'onAfterError: ${err.type} status=${code ?? '—'}',
+          );
+          if (code == 401 || code == 403) {
+            _appendInterceptorLog(
+              'onAfterError: would handle unauthorized (e.g. go to login)',
+            );
+          }
+          // Post-error: refresh + retry uses handler.resolve after dio.fetch, etc.
+          handler.next(err);
+        },
+      ),
+    ];
+  }
 
   @override
   void initState() {
     impakRetro = ImpakRetro(
-        baseUrl: Constants.BASE_URL,
-        authToken: "Bearer ${Constants.TOKEN}",
-        userLogger: true,
-        timeout: 30,
-        timeUnit: TimeUnit.SECONDS);
+      baseUrl: Constants.BASE_URL,
+      authToken: "Bearer ${Constants.TOKEN}",
+      userLogger: true,
+      timeout: 30,
+      timeUnit: TimeUnit.SECONDS,
+      clientInterceptors: _demoClientInterceptors(),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _safeCall();
     });
@@ -221,6 +271,33 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           children: <Widget>[
+            if (_interceptorEvents.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.only(top: 12.0, bottom: 4.0),
+                child: Text(
+                  'ImpakRetroClientInterceptorCallbacks (all hooks)',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 160),
+                child: ListView.builder(
+                  itemCount: _interceptorEvents.length,
+                  itemBuilder: (_, i) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 2.0,
+                    ),
+                    child: Text(
+                      _interceptorEvents[i],
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+            ],
             if (_response.isNotEmpty) ...[
               Text(
                 'TODOS',
