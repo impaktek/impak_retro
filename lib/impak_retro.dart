@@ -56,6 +56,9 @@ class ImpakRetro {
   /// on the next `init` when that parameter is non-null.
   final List<Interceptor> _registeredClientInterceptors = [];
 
+  /// Logger interceptor last registered by [init], removed before re-configuring logging.
+  Interceptor? _registeredLoggingInterceptor;
+
   /// Constructor for initializing `ImpakRetro` instance.
   ///
   /// - `userLogger`: A boolean to enable logging of requests and responses (default: true).
@@ -89,7 +92,7 @@ class ImpakRetro {
   ///
   /// This constructor is used internally for creating a singleton instance.
   ImpakRetro._internal() {
-    init();
+    init(useLogger: false);
   }
 
   /// Singleton instance of `ImpakRetro`.
@@ -99,9 +102,11 @@ class ImpakRetro {
 
   /// Initializes the Dio instance and configuration settings.
   ///
-  /// - `useLogger`: A boolean to enable logging of requests and responses (default: true).
+  /// - `useLogger`: When true, attaches the default [PrettyDioLogger] (or [loggingInterceptor] if set).
+  ///   When false, removes any logger previously added by [init]. Default: true.
   /// - `baseUrl`: A base URL for all API requests (default: null).
-  /// - `loggingInterceptor`: A custom logging interceptor for logging requests and responses (default: null).
+  /// - `loggingInterceptor`: Optional custom logging interceptor; used when [useLogger] is true,
+  ///   or on its own when [useLogger] is false.
   /// - `authToken`: A global authorization token for all requests (default: null).
   /// - `timeout`: Timeout for API requests in seconds (default: null).
   /// - `timeUnit`: Time unit for timeout (default: `TimeUnit.SECONDS`).
@@ -135,15 +140,21 @@ class ImpakRetro {
       }
     }
 
-    // Add logger interceptor if logging is enabled or custom logging interceptor is provided.
-    if (useLogger) {
-      _dio.interceptors.add(loggingInterceptor ??
+    if (_registeredLoggingInterceptor != null) {
+      _dio.interceptors.remove(_registeredLoggingInterceptor!);
+      _registeredLoggingInterceptor = null;
+    }
+
+    if (useLogger || loggingInterceptor != null) {
+      final interceptor = loggingInterceptor ??
           PrettyDioLogger(
             requestBody: true,
             requestHeader: true,
             responseBody: true,
             responseHeader: false,
-          ));
+          );
+      _dio.interceptors.add(interceptor);
+      _registeredLoggingInterceptor = interceptor;
     }
 
     // Set the authentication token if provided.
