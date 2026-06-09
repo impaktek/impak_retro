@@ -2,6 +2,13 @@
 
 ## [2.1.1] - 2026-05-24
 
+### Fixed
+
+- **`init(useLogger: false)` on `ImpakRetro.instance`:** removes any logger previously registered by `init` instead of leaving it active; the singleton no longer enables logging until you opt in.
+- **Repeated `init` with logging enabled:** replaces the existing logger instead of stacking multiple `PrettyDioLogger` interceptors.
+
+## [2.1.0] - 2026-05-24
+
 ### Added
 
 - **Client lifecycle interceptors:** `ImpakRetroClientInterceptor` and `ImpakRetroClientInterceptorCallbacks` for pre-request (`beforeRequest`), post-response (`afterResponse`), and post-error (`afterError`) hooks (token checks, refresh flows, global 401 handling, etc.).
