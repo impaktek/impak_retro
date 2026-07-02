@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:example/src/constants/local_constants.dart';
 import 'package:example/src/domain/sample_api_response_model.dart';
 import 'package:flutter/material.dart';
 import 'package:impak_retro/impak.dart';
@@ -40,12 +39,12 @@ class _MyHomePageState extends State<MyHomePage> {
   String? error;
   late ImpakRetro impakRetro;
 
-  List<Post> _response = [];
+  final List<Post> _response = [];
 
   /// Recent lines from [ImpakRetroClientInterceptorCallbacks] (all three hooks).
   final List<String> _interceptorEvents = [];
 
-  void _appendInterceptorLog(String line) {
+  /*void _appendInterceptorLog(String line) {
     if (!mounted) return;
     setState(() {
       final stamp = DateTime.now().toIso8601String();
@@ -54,10 +53,10 @@ class _MyHomePageState extends State<MyHomePage> {
         _interceptorEvents.removeLast();
       }
     });
-  }
+  }*/
 
   /// Demo interceptors: one [ImpakRetroClientInterceptorCallbacks] using every hook.
-  List<Interceptor> _demoClientInterceptors() {
+  /*List<Interceptor> _demoClientInterceptors() {
     return [
       ImpakRetroClientInterceptorCallbacks(
         onBeforeRequest: (options, handler) async {
@@ -90,30 +89,30 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     ];
-  }
+  }*/
 
   @override
   void initState() {
-    impakRetro = ImpakRetro(
+    /*impakRetro = ImpakRetro(
       baseUrl: Constants.BASE_URL,
       authToken: "Bearer ${Constants.TOKEN}",
       userLogger: true,
       timeout: 30,
       timeUnit: TimeUnit.SECONDS,
       clientInterceptors: _demoClientInterceptors(),
-    );
+    );*/
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _safeCall();
     });
     super.initState();
   }
 
-  _download() async {
+  Future<void> _download() async {
     final status = await Permission.storage.request();
     late String savePath;
     try {
       if (!status.isGranted) {
-        print("Storage permission denied.");
+        //print("Storage permission denied.");
         return;
       }
 
@@ -132,10 +131,10 @@ class _MyHomePageState extends State<MyHomePage> {
               error = "${progress / total * 100}%";
             });
           });
-    } catch (e, s) {}
+    } catch (__, _) {}
   }
 
-  _safeCall() async {
+  Future<void> _safeCall() async {
     try {
       final result = await impakRetro.typeSafeCall(
         path: "/auth/login",
@@ -148,32 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
       } else {
         error = result.asError["error"];
       }
-      /*final result = await impakRetro.typeSafeFormDataCall(
-          path: Constants.SAMPLE_PATH1,
-          method: RequestMethod.GET,
-          formData: ImpakRetroFormData({
-            "data": "",
-            "dlfd ": ""
-          }),
-          queryParameters: {
-            "param1": 3,
-            'param2': "other params"
-          },
-          baseUrl: Constants.BASE_URL,
-          authorizationToken: "Bearer ${Constants.TOKEN1}",
-        successFromJson: (json) => Response.fromJson(json),
-      );
-
-      if(result.isSuccessful){
-        ///Response is my custom model and has a field `data`
-        ///`asBody` returns a dynamic result that matches `Response` model
-        _result = result.asBody.data;//Response.fromJson(result.asBody).data;
-        ///OR
-        ///
-        //_result = result.asBody["data"];
-      }else {
-        error = result.asError.toString(); //asError returns a dynamic data which conforms to what the api returns when there is an error
-      }*/
     } catch (e) {
       if (e is ImpakRetroException) {
         error = e.message;
@@ -203,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _call() async {
+  /*void _call() async {
     try {
       setState(() {
         _response = [];
@@ -259,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {

@@ -28,36 +28,36 @@ class ImpakRetroFormData {
   ///
   /// @return A `Future` that resolves to a `FormData` object.
   Future<FormData> _fromMap() async {
-    final formData = FormData(); // Create an empty FormData instance.
+    final formData = FormData();
 
-    // Iterate over each entry in the `_data` map.
-    _data.forEach((key, value) async {
+    for (final entry in _data.entries) {
+      final key = entry.key;
+      final value = entry.value;
+
       if (value is File) {
-        // If the value is a File, convert it to a MultipartFile and add it to the files.
         formData.files.add(
           MapEntry(key, await _multipartFile(value)),
         );
       } else if (value is List) {
-        // If the value is a List, iterate through its items.
-        for (var item in value) {
+        for (final item in value) {
           if (item is File) {
-            // If the item is a File, add it to the files as a MultipartFile.
             formData.files.add(
               MapEntry(key, await _multipartFile(item)),
             );
           } else {
-            // Otherwise, add the item to the fields.
-            formData.fields.add(MapEntry(key, item));
+            formData.fields.add(MapEntry(key, _toFieldString(item)));
           }
         }
       } else {
-        // For other types, add the value directly to the fields.
-        formData.fields.add(MapEntry(key, value));
+        formData.fields.add(MapEntry(key, _toFieldString(value)));
       }
-    });
+    }
 
-    return formData; // Return the constructed FormData.
+    return formData;
   }
+
+  /// Converts a non-file field value to the [String] required by [FormData.fields].
+  String _toFieldString(dynamic value) => value.toString();
 
   /// A private helper method to convert a `File` into a `MultipartFile`.
   ///
