@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2] - 2026-07-02
+
+### Fixed
+
+- **`ImpakRetroFormData` non-string fields:** int, bool, and other non-file values are converted to strings before being added to `FormData.fields`, fixing `type 'int' is not a subtype of type 'String'`.
+- **`ImpakRetroFormData` async iteration:** replaced `forEach` with an awaited loop so file fields are fully added before the `FormData` is returned.
+
 ## [2.1.1] - 2026-05-24
 
 ### Fixed
